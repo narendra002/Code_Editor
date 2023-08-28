@@ -11,7 +11,7 @@ const Room = () => {
   const [username, setUsername] = useState("");
   const [connectedUsers, setConnectedUsers] = useState([]);
   const navigate = useNavigate();
-  const socket = io.connect('http://localhost:5000/');
+  const socket = io.connect('https://code-editor-server.vercel.app/');
 
   useEffect(() => {
     // Component did mount
@@ -66,7 +66,7 @@ const Room = () => {
   };
   const handleBeforeUnload = () => {
     if (roomId && username) {
-      const socket = io.connect('http://localhost:5000/');
+      const socket = io.connect('https://code-editor-server.vercel.app/');
       socket.emit('leaveRoom', roomId, username);
       socket.disconnect();
     }
