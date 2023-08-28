@@ -22,7 +22,8 @@ const RandomRoom = () => {
   const [socket, setSocket] = useState(null);
 
   useEffect(() => {
-    const newSocket = io("http://localhost:5000/");
+    
+     const  newSocket= io.connect('https://code-editor-server.vercel.app/');
     setSocket(newSocket);
 
     newSocket.emit("joinRoom", roomId, username, (response) => {
@@ -48,7 +49,7 @@ const RandomRoom = () => {
 
   const copyRoomIdToClipboard = () => {
     navigator.clipboard.writeText(roomId).then(() => {
-      console.log("Room ID copied to clipboard:", roomId);
+      // console.log("Room ID copied to clipboard:", roomId);
       toast.success('Room ID copied to clipboard');
     });
   };
