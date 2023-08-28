@@ -1,0 +1,158 @@
+/* RandomRoom.css */
+
+.container {
+  display: flex;
+  gap: 20px;
+  padding: 5px;
+}
+
+.left-container {
+  flex: 1;
+  padding: 20px;
+  border-right: 1px solid #ccc;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.heading {
+  font-size: 1.5rem;
+  margin-bottom: 10px;
+}
+
+.user-list {
+  display: flex;
+  flex-direction: row;
+  gap: 5px;
+}
+
+.username {
+  padding: 10px 20px;
+  background-color: rgb(224, 224, 224);
+  border-radius: 5px;
+  white-space: nowrap;
+  shape-outside: 5px;
+}
+
+.buttons-container {
+  margin-top: auto; /* Move the buttons to the bottom */
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
+
+
+.right-container {
+  flex: 2;
+  margin: 20px;
+  padding: 20px;
+}
+button {
+  font-family: "Asap", sans-serif;
+  cursor: pointer;
+  color: #e0d7d7;
+
+   color: #141414;
+   font-weight: 300;
+   font-style: italic;
+  font-size: 16px;
+  text-transform: uppercase;
+  width: auto;
+  border: 0;
+  padding: 10px ;
+  margin-top: 10px;
+  margin-left: -5px;
+  border-radius: 5px;
+  background-color: #f45b69;
+  -webkit-transition: background-color 300ms;
+  -moz-transition: background-color 300ms;
+  transition: background-color 300ms;
+}
+.form > button:hover {
+  background-color: #f24353;
+}
+
+.language-select-hidden {
+  display: none;
+  visibility: hidden;
+  padding-right: 10px;
+  /* padding: 5px; */
+}
+
+.language-select {
+  cursor: pointer;
+  display: inline-block;
+  position: relative;
+  font-size: 16px;
+  color: #000000;
+  width: 220px;
+  height: 40px;
+ 
+}
+
+.language-select-styled {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  background-color: #c0392b;
+  padding: 8px 15px;
+  -moz-transition: all 0.2s ease-in;
+  -o-transition: all 0.2s ease-in;
+  -webkit-transition: all 0.2s ease-in;
+  transition: all 0.2s ease-in;
+}
+.language-select-styled:after {
+  content: "";
+  width: 0;
+  height: 0;
+  border: 7px solid transparent;
+  border-color: #fff transparent transparent transparent;
+  position: absolute;
+  top: 16px;
+  right: 10px;
+}
+.language-select-styled:hover {
+  background-color: #b83729;
+}
+.language-select-styled:active, .language-select-styled.active {
+  background-color: #ab3326;
+}
+.language-select-styled:active:after, .language-select-styled.active:after {
+  top: 9px;
+  border-color: transparent transparent #fff transparent;
+}
+
+.language-select-options {
+  display: none;
+  position: absolute;
+  top: 100%;
+  right: 0;
+  left: 0;
+  z-index: 999;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  background-color: #ab3326;
+}
+.language-select-options li {
+  margin: 0;
+  padding: 12px 0;
+  text-indent: 15px;
+  border-top: 1px solid #962d22;
+  -moz-transition: all 0.15s ease-in;
+  -o-transition: all 0.15s ease-in;
+  -webkit-transition: all 0.15s ease-in;
+  transition: all 0.15s ease-in;
+}
+.language-select-options li:hover, .language-select-options li.is-language-selected {
+  color: #c0392b;
+  background: #fff;
+}
+.language-select-options li[rel="hide"] {
+  display: none;
+}
+
+
