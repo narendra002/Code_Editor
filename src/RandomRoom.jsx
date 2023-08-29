@@ -22,6 +22,7 @@ const RandomRoom = () => {
   const [socket, setSocket] = useState(null);
 
   useEffect(() => {
+    const newSocket = io("https://code-editor-server.vercel.app/");
     
      const  newSocket= io.connect('https://code-editor-server.vercel.app/');
     setSocket(newSocket);
