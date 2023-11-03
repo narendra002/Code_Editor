@@ -11,7 +11,7 @@ const Room = () => {
   const [username, setUsername] = useState("");
   const [connectedUsers, setConnectedUsers] = useState([]);
   const navigate = useNavigate();
-  const socket = io.connect('https://editor-server-seven.vercel.app/');
+  const socket = io.connect('localhost:5000');
 
   useEffect(() => {
     // Component did mount

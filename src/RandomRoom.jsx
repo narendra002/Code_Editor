@@ -1,154 +1,136 @@
 import React, { useState, useEffect } from "react";
-import CodeMirror from "@uiw/react-codemirror";
-import { javascript } from "@codemirror/lang-javascript";
-import { python } from "@codemirror/lang-python";
-import { java } from "@codemirror/lang-java";
-import "./RandomRoom.css";
+
 import { useLocation, useNavigate } from "react-router-dom";
-import { io } from "socket.io-client";
-import { ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import Header from "./Header";
+import CodeEditor from "./CodeEditor";
+import OutputDisplay from "./OutputDisplay";
+import UserList from "./UserList";
+import {
+  connectToSocket,
+  joinRoom,
+  updateCode,
+  onCodeUpdated,
+  onConnectedUsersUpdated,
+} from "./SocketManager.js";
 
 const RandomRoom = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [connectedUsers, setConnectedUsers] = useState([]);
   const [code, setCode] = useState("//Write Code");
-  const [selectedLanguage, setSelectedLanguage] = useState("javascript"); // Default language
-  const [output, setOutput] = useState(""); // Output of executed code
+  const [selectedLanguage, setSelectedLanguage] = useState("javascript");
+  const [output, setOutput] = useState("");
   const roomId = new URLSearchParams(location.search).get("roomId");
   const username = new URLSearchParams(location.search).get("username");
-
   const [socket, setSocket] = useState(null);
 
   useEffect(() => {
-    // const newSocket = io("https://editor-server-seven.vercel.app/");
-    
-     const  newSocket= io.connect('https://editor-server-seven.vercel.app/');
-    setSocket(newSocket);
+    const socket = connectToSocket("localhost:5000"); // Connect to the socket
+    console.log("Socket initialized:", socket);
+    setSocket(socket);
 
-    newSocket.emit("joinRoom", roomId, username, (response) => {
-      if (!response.success) {
-        console.error("Failed to join room:", response.error);
-        navigate("/");
-      }
+    joinRoom(socket, roomId, username, (error) => {
+      console.error("Failed to join room:", error);
+      navigate("/");
     });
 
-    newSocket.on("codeUpdated", (newCode) => {
+    onCodeUpdated(socket, (newCode) => {
       setCode(newCode);
     });
 
-    newSocket.on("connectedUsersUpdated", (users) => {
+    onConnectedUsersUpdated(socket, (users) => {
       setConnectedUsers(users);
     });
 
     return () => {
-      newSocket.emit("leaveRoom", roomId, username);
-      newSocket.disconnect();
+      leaveRoom(socket, roomId, username);
+      socket.disconnect();
     };
   }, [navigate, roomId, username]);
 
+
+
   const copyRoomIdToClipboard = () => {
     navigator.clipboard.writeText(roomId).then(() => {
-      // console.log("Room ID copied to clipboard:", roomId);
-      toast.success('Room ID copied to clipboard');
+      toast.success("Room ID copied to clipboard");
     });
   };
-  
+
   const onCodeChange = (value, viewUpdate) => {
     setCode(value);
     socket.emit("updateCode", roomId, value);
   };
-  
+
   const leaveRoom = () => {
-    socket.emit("leaveRoom", roomId, username);
-    navigate("/");
-  };
+    if (socket) {
+      console.log("Socket exists. Emitting 'leaveRoom'");
+      socket.emit("leaveRoom", roomId, username);
+      navigate("/");
+    } else {
+      console.error("Socket is null. Connection may not be established.");
+    }
+  }
+  
 
   const handleLanguageChange = (event) => {
     setSelectedLanguage(event.target.value);
   };
 
-  const getLanguageExtensions = () => {
-    switch (selectedLanguage) {
-      case "javascript":
-        return [javascript({ jsx: true })];
-      case "python":
-        return [python()];
-      case "java":
-        return [java()];
-      default:
-        return [];
-    }
-  };
+
 
   const runCode = () => {
+    // Create a custom console to capture log messages
+    const customConsole = {
+      log: (message) => {
+        // Append the message to the existing output
+        setOutput((prevOutput) => prevOutput + message + '\n');
+      },
+    };
+
     try {
-      const result = eval(code);
-      if (result !== undefined) {
-        setOutput(result.toString());
-      } else {
-        setOutput("Code executed successfully.");
-      }
+      // Create a function to run the code within the custom console context
+      const execute = new Function('console', code);
+      execute(customConsole);
+
+      // Indicate that the code executed successfully
+      setOutput((prevOutput) => prevOutput);
     } catch (error) {
+      // Handle errors and display a user-friendly error message
       setOutput(`Error: ${error.message}`);
     }
   };
-  
+
+
+
 
   return (
-    <div className="container">
-      <div className="left-container">
-        <h1 className="heading">Connected Users</h1>
-        <div className="user-list">
-          {connectedUsers.map((user) => (
-            <div key={user.id} className="username">
-              {user.username}
-            </div>
-          ))}
+    <div className="bg-gray-200 min-h-screen p-4">
+      <Header
+        roomId={roomId}
+        copyRoomIdToClipboard={copyRoomIdToClipboard}
+        leaveRoom={leaveRoom}
+      />
+      <div className="flex flex-col md:flex-row items-start justify-center space-y-4 md:space-y-0 md:space-x-4">
+        <div className="bg-slate-100 shadow p-4 w-full md:w-1/4 mt-10">
+          <UserList connectedUsers={connectedUsers} />
         </div>
-        <div className="buttons-container">
-          <button className="button" onClick={copyRoomIdToClipboard}>
-            Copy Room Id
-          </button>
-          <button className="button" onClick={leaveRoom}>
-            Leave Room
-          </button>
-        </div>
-       
-      </div>
-
-      <div className="right-container">
-        <div className="language-select-container">
-          <select
-            onChange={handleLanguageChange}
-            value={selectedLanguage}
-            className="language-select"
-          >
-            <option value="javascript">JavaScript</option>
-            <option value="python">Python</option>
-            <option value="java">Java</option>
-          </select>
-          <button className="button" onClick={runCode}>
-            Run
-          </button>
-        </div>
-        <CodeMirror
-          value={code}
-          defaultValue={code}
-          height="500px"
-          width="100%"
-          extensions={[...getLanguageExtensions()]}
-          onChange={onCodeChange}
-        />
-        <div className="output-container">
-          <h2>Output:</h2>
-          <pre>{output}</pre>
+        <div className="bg-slate-50 shadow p-4 w-full md:w-3/4">
+          <CodeEditor
+            code={code}
+            selectedLanguage={selectedLanguage}
+            onCodeChange={onCodeChange}
+            runCode={runCode}
+            onLanguageChange={handleLanguageChange}
+          />
+          <OutputDisplay output={output} />
         </div>
       </div>
       <ToastContainer
         position="bottom-right"
-        autoClose={3000} // Automatically close after 3 seconds
+        autoClose={3000}
         hideProgressBar
         newestOnTop={false}
         closeOnClick
